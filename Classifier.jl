@@ -30,20 +30,26 @@ function classify(x, y, x_unk, epochs)
     circuit = prepare(amplitudes, false)
     push!(circuit, put((m_qubits + 1)=>H))
     push!(circuit, Measure(total_qubits,locs=(m_qubits+1)))
-    push!(circuit, Measure(total_qubits,locs=(total_qubits)))
 
-    probs = [0.0, 0.0]
-    @threads for i in 1:epochs
-        # simulate
-        state = zero_state(total_qubits)
-        apply!(state, circuit)
-
-        # check for which state has the greatest probability
-        for i in 1:2^total_qubits
-            probs[(binary_reverse(total_qubits,i)&1) + 1] += abs(statevec(state)[i])^2
+    # simulation
+    epochs = 100
+    curr = epochs
+    m_circ = chain(total_qubits, Measure(total_qubits, locs=total_qubits))
+    prediction = 0.0
+    @threads for epoch in 1:epochs
+        # post selection
+        state_ = zero_state(total_qubits)
+        r = apply!(state_, circuit)
+        while measure(r, m_qubits+1)[1][1] != 1
+            state_ = zero_state(total_qubits)
+            r = apply!(state_, circuit)
         end
-    end
-    probs ./= epochs
 
-    return argmax(probs) - 1
+        # measurement
+        r = apply!(state_, m_circ)
+        measurement = measure(r,total_qubits)
+        prediction += measurement[1][1]
+    end
+
+    return prediction / epochs
 end
