@@ -10,7 +10,8 @@ include("Classifier.jl")
 df = DataFrame(CSV.File("iris.csv"))
 
 # raw data
-records = vcat(1:32, 52:83)
+#records = vcat(1:32, 51:82)
+records = 1:100
 features = 1:4
 x = Matrix(df[records,features])
 y = [df[i, 5] for i in records]
@@ -27,10 +28,9 @@ cheese = copy(x)
 # keyize y TODO: generalize
 y = [y[i] == "setosa" ? 1 : 0 for i in 1:length(y)]
 
-num_records = size(x, 1)
-num_features = size(x, 2)
-print(@sprintf("Data points:\t%d\nFeatures:\t%d\n", num_records, num_features))
-
 # test Classifier.jl
-test_point_index = rand(1:length(records))
-print(classify(x,y,x[33,:],100), " ", y[33])
+classifications = []
+for test_point_index in 1:100
+    push!(classifications, classify(x[vcat(1:32, 51:82),:],y[vcat(1:32, 51:82)],x[33,:],100))
+    print("point ", test_point_index, " ", classifications[test_point_index], " ", y[33], "\n")
+end
