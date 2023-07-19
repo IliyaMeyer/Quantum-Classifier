@@ -3,6 +3,7 @@ using CSV
 using DataFrames
 using Statistics
 using Random
+using Base.Threads
 include("StateBuilder.jl")
 include("Utils.jl")
 include("Classifier.jl")
@@ -30,7 +31,7 @@ y = [y[i] == "setosa" ? 1 : 0 for i in 1:length(y)]
 
 # test Classifier.jl
 classifications = zeros(100)
-for test_point_index in 90:100
-    push!(classifications, classify(x[vcat(1:32, 51:82),:],y[vcat(1:32, 51:82)],x[test_point_index,:],100))
+@threads for test_point_index in [1, 11, 21, 31, 41, 51, 61, 71, 81, 91, 100]
+    classifications[test_point_index] = classify(x[vcat(1:32, 51:82),:],y[vcat(1:32, 51:82)],x[test_point_index,:],100)
     print("point ", test_point_index, " ", classifications[test_point_index], " ", y[test_point_index], "\n")
 end
