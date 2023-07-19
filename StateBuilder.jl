@@ -20,7 +20,7 @@ function prepare(amplitudes, computational_basis)
         new_amplitudes = copy(amplitudes)
         for i in 0:(length(amplitudes) - 1)
             i_r = binary_reverse(bits, i)
-            new_states[i + 1] = amplitudes[i_r + 1] # the indexes are interchangable
+            new_amplitudes[i + 1] = amplitudes[i_r + 1] # the indexes are interchangable
         end
         amplitudes = new_amplitudes
     end
