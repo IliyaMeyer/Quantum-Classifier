@@ -3,9 +3,9 @@ using CSV
 using DataFrames
 using Statistics
 using Random
-include("../lib/StateBuilder.jl")
-include("../lib/Utils.jl")
-include("../lib/Classifier.jl")
+include("StateBuilder.jl")
+include("Utils.jl")
+include("Classifier.jl")
 
 df = DataFrame(CSV.File("iris.csv"))
 
