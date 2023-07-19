@@ -30,7 +30,7 @@ y = [y[i] == "setosa" ? 1 : 0 for i in 1:length(y)]
 
 # test Classifier.jl
 classifications = []
-for test_point_index in 1:100
-    push!(classifications, classify(x[vcat(1:32, 51:82),:],y[vcat(1:32, 51:82)],x[33,:],100))
-    print("point ", test_point_index, " ", classifications[test_point_index], " ", y[33], "\n")
+for test_point_index in 90:100
+    push!(classifications, classify(x[vcat(1:32, 51:82),:],y[vcat(1:32, 51:82)],x[test_point_index,:],100))
+    print("point ", test_point_index, " ", classifications[test_point_index], " ", y[test_point_index], "\n")
 end
