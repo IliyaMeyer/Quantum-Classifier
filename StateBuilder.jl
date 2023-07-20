@@ -85,7 +85,7 @@ function prepare(amplitudes, computational_basis)
             alphas[i] = alpha(qubit, i - 2^(qubit-1))
         end
     end
-    
+
     # setup states for each qubit
     processed_qubits = []
     for qubit in 1:num_qubits

@@ -12,8 +12,8 @@ df = DataFrame(CSV.File("iris.csv"))
 
 # adjustables
 records = 1:100
-features = 1:2
-data_points = [33, 89]#vcat(1:16, 51:66)
+features = 1:4
+data_points = vcat(1:16, 51:66)
 test_points = 1:100
 epochs = 100
 
@@ -21,7 +21,7 @@ x = Matrix(df[records,features])
 y = [df[i, 5] for i in records]
 
 # standardize x
-#x = mapslices(col -> (col .- mean(col))./std(col), x, dims=1)
+x = mapslices(col -> (col .- mean(col))./std(col), x, dims=1)
 x[isnan.(x)] .= 0
 
 # normalize x
@@ -29,13 +29,15 @@ x = mapslices(row -> row./norm(row), x, dims=2)
 x[isnan.(x)] .= 0
 
 # keyize y TODO: generalize
-y = [y[i] == "setosa" ? 0 : 1 for i in 1:length(y)]
+y = [y[i] == "setosa" ? -1 : 1 for i in 1:length(y)]
 
-# test Classifier.jl
 classifications = zeros(100)
-@threads for test_point_index in test_points
-    classifications[test_point_index] = classify(x[data_points,:],y[data_points],x[test_point_index,:],epochs)
-    print("point ", test_point_index, " ", classifications[test_point_index], " ", y[test_point_index], "\n")
+for test_point in test_points
+    sum = 0.0
+    for data_point in data_points
+        sum += y[data_point] * (1 - (1/(4*length(data_points)) * abs(x[test_point] .- x[data_point])^2))
+    end
+    classifications[test_point] = sum >= 0 ? 1 : -1
 end
 
 correct = 0
