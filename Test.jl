@@ -13,8 +13,8 @@ df = DataFrame(CSV.File("iris.csv"))
 # adjustables
 records = 1:100
 features = 1:2
-data_points = [33, 89]#vcat(1:16, 51:66)
-test_points = 1:100
+data_points = [33,88]
+test_points = [21] #vcat(11:14, 81:84)
 epochs = 100
 
 x = Matrix(df[records,features])
@@ -33,13 +33,15 @@ y = [y[i] == "setosa" ? 0 : 1 for i in 1:length(y)]
 
 # test Classifier.jl
 classifications = zeros(100)
-@threads for test_point_index in test_points
-    classifications[test_point_index] = classify(x[data_points,:],y[data_points],x[test_point_index,:],epochs)
-    print("point ", test_point_index, " ", classifications[test_point_index], " ", y[test_point_index], "\n")
+@time begin
+    @threads for test_point_index in test_points
+        classifications[test_point_index] = classify(x[data_points,:],y[data_points],x[test_point_index,:],epochs)
+        print("point ", test_point_index, " ", classifications[test_point_index], " ", y[test_point_index], "\n")
+    end
 end
 
 correct = 0
-for test_point in test_points
+@threads for test_point in test_points
     global correct
     if round(classifications[test_point]) == y[test_point]
         correct += 1

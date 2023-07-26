@@ -28,17 +28,6 @@ function classify(x, y, x_unk, epochs)
 
     # build circuit
     circuit = prepare(amplitudes, false) #TODO I don't even know
-    new_amplitudes = copy(amplitudes)
-    """
-    bits = log(2, length(amplitudes))
-    for i in 0:(length(amplitudes) - 1)
-        i_r = binary_reverse(bits, i)
-        new_amplitudes[i + 1] = amplitudes[i_r + 1] # the indexes are interchangable
-    end
-    amplitudes = new_amplitudes
-    init_state = ArrayReg(complex.(normalize(amplitudes)))
-    circuit = chain(total_qubits)
-    """
     push!(circuit, put((m_qubits + 1)=>H))
     push!(circuit, Measure(total_qubits,locs=(m_qubits+1)))  
 
@@ -47,11 +36,9 @@ function classify(x, y, x_unk, epochs)
     prediction = 0.0
     for epoch in 1:epochs
         # post selection
-        #state_ = copy(init_state)
         state_ = zero_state(total_qubits)
         r = apply!(state_, circuit)
         while measure(r, m_qubits+1)[1][1] != 1
-            #state_ = copy(init_state)
             state_ = zero_state(total_qubits)
             r = apply!(state_, circuit)
         end
