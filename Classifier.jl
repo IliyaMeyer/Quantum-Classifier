@@ -2,6 +2,7 @@ using Yao, YaoPlots
 using StatsBase
 using LinearAlgebra
 using Base.Threads
+using Printf
 
 include("Utils.jl")
 include("StateBuilder.jl")
@@ -27,27 +28,27 @@ function classify(x, y, x_unk, epochs)
     end
 
     # build circuit
-    circuit = prepare(amplitudes, false) #TODO I don't even know
+    circuit = prepare(amplitudes, false) 
     push!(circuit, put((m_qubits + 1)=>H))
     push!(circuit, Measure(total_qubits,locs=(m_qubits+1)))  
 
     # simulation
     m_circ = chain(total_qubits, Measure(total_qubits, locs=total_qubits))
     prediction = 0.0
-    for epoch in 1:epochs
+    fails = 0
+    @threads for epoch in 1:epochs
         # post selection
         state_ = zero_state(total_qubits)
-        r = apply!(state_, circuit)
-        while measure(r, m_qubits+1)[1][1] != 1
+        while measure(apply!(state_, circuit), m_qubits+1)[1][1] != 1
+            fails += 1
             state_ = zero_state(total_qubits)
-            r = apply!(state_, circuit)
         end
 
         # measurement
-        r = apply!(state_, m_circ)
-        measurement = measure(r,total_qubits)
-        prediction += measurement[1][1]
+        prediction += measure(apply(state_, m_circ),total_qubits)[1][1]
     end
+
+    print(@sprintf("Post selection failures: %d of %d epochs| ratio: %.3f\n", fails, epochs, fails / (epochs + fails)))
 
     return 1 - prediction / epochs
 end

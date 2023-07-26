@@ -13,8 +13,8 @@ df = DataFrame(CSV.File("iris.csv"))
 # adjustables
 records = 1:100
 features = 1:2
-data_points = [33,88]
-test_points = [21] #vcat(11:14, 81:84)
+data_points = vcat(21:36, 81:961)
+test_points = [50]
 epochs = 100
 
 x = Matrix(df[records,features])
@@ -28,7 +28,7 @@ x[isnan.(x)] .= 0
 x = mapslices(row -> row./norm(row), x, dims=2)
 x[isnan.(x)] .= 0
 
-# keyize y TODO: generalize
+# keyize y
 y = [y[i] == "setosa" ? 0 : 1 for i in 1:length(y)]
 
 # test Classifier.jl
