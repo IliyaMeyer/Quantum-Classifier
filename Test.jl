@@ -12,16 +12,16 @@ df = DataFrame(CSV.File("iris.csv"))
 
 # adjustables
 records = 1:100
-features = 1:2
-data_points = vcat(21:36, 81:961)
-test_points = [50]
+features = 1:4
+data_points = vcat(21:52, 61:92)
+test_points = 1:100
 epochs = 100
 
 x = Matrix(df[records,features])
 y = [df[i, 5] for i in records]
 
 # standardize x
-#x = mapslices(col -> (col .- mean(col))./std(col), x, dims=1)
+x = mapslices(col -> (col .- mean(col))./std(col), x, dims=1)
 x[isnan.(x)] .= 0
 
 # normalize x

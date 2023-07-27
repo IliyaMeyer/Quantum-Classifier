@@ -28,20 +28,42 @@ function classify(x, y, x_unk, epochs)
     end
 
     # build circuit
+    amplitudes = normalize(amplitudes)
     circuit = prepare(amplitudes, false) 
     push!(circuit, put((m_qubits + 1)=>H))
     push!(circuit, Measure(total_qubits,locs=(m_qubits+1)))  
+
+    # manual setup
+    bits = log(2, length(amplitudes))
+    new_amplitudes = copy(amplitudes)
+    for i in 0:(length(amplitudes) - 1)
+        i_r = binary_reverse(bits, i)
+        new_amplitudes[i + 1] = amplitudes[i_r + 1] # the indexes are interchangable
+    end
+    amplitudes = new_amplitudes
+    cheese = ArrayReg(complex(amplitudes))
+    test = zero_state(total_qubits)
+    apply!(test, circuit)
+    aux_circ = chain(total_qubits, put((m_qubits + 1)=>H), Measure(total_qubits,locs=(m_qubits+1)))
+    #apply!(cheese, aux_circ)
+    #print(statevec(cheese), "\n\n", statevec(test), "\n\n", test == cheese, "\n\n")
 
     # simulation
     m_circ = chain(total_qubits, Measure(total_qubits, locs=total_qubits))
     prediction = 0.0
     fails = 0
-    @threads for epoch in 1:epochs
+    for epoch in 1:epochs
         # post selection
-        state_ = zero_state(total_qubits)
-        while measure(apply!(state_, circuit), m_qubits+1)[1][1] != 1
+        #state_ = zero_state(total_qubits)
+        #apply!(state_, circuit)
+        state_ = copy(cheese)
+        apply!(state_, aux_circ)
+        while measure(state_, m_qubits+1)[1][1] != 1
             fails += 1
-            state_ = zero_state(total_qubits)
+            #state_ = zero_state(total_qubits)
+            #apply!(state_, circuit)
+            state_=copy(cheese)
+            apply!(state_, aux_circ)
         end
 
         # measurement
